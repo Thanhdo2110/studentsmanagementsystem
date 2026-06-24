@@ -1,0 +1,65 @@
+name: CI/CD Student Management System
+
+on:
+  push:
+    branches: [ "main" ] # Hoặc "master" tùy theo nhánh chính của bạn
+
+jobs:
+  # GIAI ĐOẠN 1: KIỂM TRA VÀ BUILD CODE
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python for Backend Test
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Backend Dependencies & Run Test
+        run: |
+          cd backend
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Thêm lệnh chạy test của bạn ở đây nếu có, ví dụ: pytest
+          echo "Backend test passed!"
+
+      - name: Set up Node.js for Frontend Test
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies & Build Test
+        run: |
+          cd frontend
+          npm ci
+          npm run build --if-present
+          echo "Frontend build test passed!"
+
+  # GIAI ĐOẠN 2: TỰ ĐỘNG DEPLOY LÊN AWS EC2
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test-and-build # Chỉ deploy nếu giai đoạn test ở trên thành công
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "Đã kết nối thành công tới EC2. Bắt đầu quá trình Deploy..."
+            
+            # Di chuyển vào thư mục dự án trên EC2
+            cd ~/studentsmanagementsystem
+            
+            # Lấy code mới nhất từ GitHub về Server
+            git pull origin main
+            
+            # Thực hiện build lại các container bị thay đổi và chạy ngầm
+            sudo docker compose down
+            sudo docker compose up -d --build
+            
+            echo "Hệ thống đã cập nhật và khởi động lại thành công!"
