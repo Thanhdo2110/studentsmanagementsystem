@@ -1,0 +1,19 @@
+# Env & secrets
+.env
+backend/.env
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.log
