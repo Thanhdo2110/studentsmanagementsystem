@@ -1,0 +1,54 @@
+services:
+  student-db:
+    image: mysql:8.0
+    container_name: student-mysql-db
+    restart: always
+    ports:
+      - "3307:3306"  
+    environment:
+      MYSQL_ROOT_PASSWORD: "2110"
+      MYSQL_DATABASE: student_management
+      MYSQL_ROOT_HOST: "%"
+    volumes:
+      - student_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p2110"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - student-network
+
+  student-backend:
+    build: ./backend
+    container_name: student-flask-backend
+    restart: always
+    ports:
+      - "5001:5000"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=2110
+      - DB_HOST=student-db
+      - DB_PORT=3306
+      - DB_NAME=student_management
+    depends_on:
+      student-db:
+        condition: service_healthy
+    networks:
+      - student-network
+
+  student-frontend:
+    build: ./frontend
+    container_name: student-react-frontend
+    restart: always
+    ports:
+      - "3001:3001"
+    networks:
+      - student-network
+
+volumes:
+  student_db_data:
+
+networks:
+  student-network:

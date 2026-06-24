@@ -25,10 +25,11 @@ class Classroom(db.Model):
     grade = db.Column(db.String(20))
     teacher_name = db.Column(db.String(100))
     capacity = db.Column(db.Integer, default=40)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
-        count = Student.query.filter_by(class_name=self.class_name).count()
+        count = Student.query.filter_by(class_name=self.class_name, owner_id=self.owner_id).count()
         return {**{c.name: getattr(self, c.name) for c in self.__table__.columns},
                 "student_count": count, "created_at": self.created_at.isoformat() if self.created_at else None}
 
@@ -44,6 +45,7 @@ class Student(db.Model):
     class_name = db.Column(db.String(50))
     address = db.Column(db.String(255))
     status = db.Column(db.String(20), default="active")
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -61,6 +63,7 @@ class ActivityLog(db.Model):
     action = db.Column(db.String(50), nullable=False)
     detail = db.Column(db.String(255))
     username = db.Column(db.String(50))
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):

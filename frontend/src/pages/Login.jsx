@@ -15,10 +15,17 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault(); setLoading(true)
     try {
-      const { data } = mode === 'login' ? await apiLogin(form) : await apiRegister(form)
-      login(data.token, data.user)
-      toast.success(mode === 'login' ? 'Đăng nhập thành công' : 'Đăng ký thành công')
-      nav('/')
+      if (mode === 'login') {
+        const { data } = await apiLogin(form)
+        login(data.token, data.user)
+        toast.success('Đăng nhập thành công')
+        nav('/')
+      } else {
+        await apiRegister(form)
+        toast.success('Đăng ký thành công, mời đăng nhập')
+        setMode('login')
+        setForm({ username: form.username, password: '', full_name: '' })
+      }
     } catch (err) { toast.error(err.response?.data?.error || 'Có lỗi xảy ra') }
     finally { setLoading(false) }
   }

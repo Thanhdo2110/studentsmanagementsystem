@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS classrooms (
     grade VARCHAR(20),
     teacher_name VARCHAR(100),
     capacity INT DEFAULT 40,
+    owner_id INT NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -31,6 +33,8 @@ CREATE TABLE IF NOT EXISTS students (
     class_name VARCHAR(50),
     address VARCHAR(255),
     status VARCHAR(20) DEFAULT 'active',
+    owner_id INT NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -39,5 +43,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     action VARCHAR(50) NOT NULL,
     detail VARCHAR(255),
     username VARCHAR(50),
+    owner_id INT NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
